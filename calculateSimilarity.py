@@ -71,4 +71,4 @@ for diseaseId in diseaseInfo:
         else:
             diseaseScores[diseaseId] = [score]
 df = pd.DataFrame(diseaseScores)
-df.to_csv('CalculatedResult/scores.csv')
+df.to_csv('CalculatedResult/scores.csv',sep=',',index=False)
