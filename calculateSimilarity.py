@@ -3,6 +3,7 @@ import scipy.io as sio
 import pandas as pd
 import numpy as np
 import time
+
 diseaseVectors = sio.loadmat('embeddingResult/disease_result.mat')
 diseaseVectors = diseaseVectors['embedding']
 
@@ -19,6 +20,18 @@ def cal_similarity(vector, vector1):
     for index in range(vl):
         distance += (vector[index] - vector1[index]) ** 2
     return distance
+
+
+def cal_cos_sim(vector, vector1):
+    vl = len(vector)
+    if vl != len(vector1):
+        raise Exception('传入的两个向量长度不相等')
+    distance = 0.0
+    mul = 0.0
+    for index in range(vl):
+        mul += vector[index] * vector1[index]
+        distance += (vector[index] - vector1[index]) ** 2
+    return float(mul) / distance
 
 
 ''' 
@@ -42,14 +55,16 @@ with open('GraphData/Task_class.txt') as read:
         diseaseInfo[diseaseId] = vectorId
         line = read.readline()
 post = time.time()
-print 'cost: ', str(post-pre) +'s'
+print 'cost: ', str(post - pre) + 's'
 print 'calculating distances between vectors'
 '''
     预先计算所有向量之间的距离
 '''
 distances = {}
-
-print diseaseVectors
+# df = pd.read_csv('distance.csv')
+# print df.info()
+# distances = df.to_dict()
+# print diseaseVectors
 for diseaseId in range(len(diseaseVectors)):
     curDisease = diseaseVectors[diseaseId]
 
@@ -64,37 +79,40 @@ for diseaseId in range(len(diseaseVectors)):
         else:
             distances[diseaseId] = [distance]
     post = time.time()
-    print 'cur: ', str(diseaseId), ' cost: ', str(post - pre),'s'
+    print 'cur: ', str(diseaseId), ' cost: ', str(post - pre), 's'
 df = pd.DataFrame(distances)
-df.to_csv('CalculatedResult/distance.csv', sep=',', index=False)
+df.to_csv('CalculatedResult/cos_sim.csv', sep=',', index=False)
 
 '''
     计算疾病相似性得分
 '''
 print 'calculating scores between disease'
 diseaseScores = {}
-distances = np.zeros((20000,20000))
-print distances
+
+
 for diseaseId in diseaseInfo:
     curDisease = diseaseInfo[diseaseId]
-    print 'calculating {0}'.format(diseaseId), curDisease
+    pre = time.time()
     for secondDiseaseId in diseaseInfo:
         if secondDiseaseId > diseaseId:
             secondDisease = diseaseInfo[secondDiseaseId]
-            print secondDisease
-            score = 0
+            score = 0.0
             for vid in curDisease:
                 for svid in secondDisease:
-                    if svid < vid:
-                        score += distances[svid][vid]
-                    else:
-                        score += distances[vid][svid]
+                    # print svid,
+                    svid = max(svid, vid)
+                    vid = min(svid, vid)
+                    if svid < 10312:
+                        svid = str(svid)
+                        score += distances[str(svid)][vid]
 
         else:
-            score = 0.0
+            score = distances[str(secondDiseaseId)][int(diseaseId)]
         if diseaseId in diseaseScores:
             diseaseScores[diseaseId].append(score)
         else:
             diseaseScores[diseaseId] = [score]
+        post = time.time()
+        print 'calculating {0}, cost {1}s'.format(diseaseId, post - pre)
 df = pd.DataFrame(diseaseScores)
-df.to_csv('CalculatedResult/scores.csv', sep=',', index=False)
+df.to_csv('CalculatedResult/simscores.csv', sep=',', index=False)
