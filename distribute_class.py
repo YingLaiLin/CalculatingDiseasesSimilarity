@@ -5,7 +5,7 @@ index = 0
 pair = dict()
 for row, rowSeries in df.iterrows():
 
-
+    # print 'row: %s rowSeries %s' % (row,rowSeries)
     if not pd.isnull(rowSeries[1]):
         for gene_id in rowSeries[1].split(';'):
 
@@ -32,7 +32,7 @@ for row, rowSeries in df.iterrows():
 # s = pd.Series(pair)
 # print s
 # s.to_csv('GraphData/TaskData_group.txt', sep='\t')
-with open('GraphData/TaskData_group.txt', 'w') as out:
+with open('GraphData/TaskData_group.txt1', 'w') as out:
     for key in pair.keys():
         out.write(key)
         out.write(' : ')

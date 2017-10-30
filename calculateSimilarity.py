@@ -56,37 +56,38 @@ with open('GraphData/Task_class.txt') as read:
         line = read.readline()
 post = time.time()
 print 'cost: ', str(post - pre) + 's'
-print 'calculating distances between vectors'
-'''
-    预先计算所有向量之间的距离
-'''
-distances = {}
-# df = pd.read_csv('distance.csv')
-# print df.info()
-# distances = df.to_dict()
-# print diseaseVectors
-for diseaseId in range(len(diseaseVectors)):
-    curDisease = diseaseVectors[diseaseId]
-
-    pre = time.time()
-    for secondDiseaseId in range(len(diseaseVectors)):
-        if diseaseId < secondDiseaseId:
-            distance = cal_similarity(curDisease, diseaseVectors[secondDiseaseId])
-        else:
-            distance = 0.0
-        if diseaseId in distances:
-            distances[diseaseId].append(distance)
-        else:
-            distances[diseaseId] = [distance]
-    post = time.time()
-    print 'cur: ', str(diseaseId), ' cost: ', str(post - pre), 's'
-df = pd.DataFrame(distances)
-df.to_csv('CalculatedResult/cos_sim.csv', sep=',', index=False)
+# print 'calculating distances between vectors'
+# '''
+#     预先计算所有向量之间的距离
+# '''
+# distances = {}
+#
+# for diseaseId in range(len(diseaseVectors)):
+#     curDisease = diseaseVectors[diseaseId]
+#
+#     pre = time.time()
+#     for secondDiseaseId in range(len(diseaseVectors)):
+#         if diseaseId < secondDiseaseId:
+#             distance = cal_similarity(curDisease, diseaseVectors[secondDiseaseId])
+#         else:
+#             distance = 0.0
+#         if diseaseId in distances:
+#             distances[diseaseId].append(distance)
+#         else:
+#             distances[diseaseId] = [distance]
+#     post = time.time()
+#     print 'cur: ', str(diseaseId), ' cost: ', str(post - pre), 's'
+# df = pd.DataFrame(distances)
+# df.to_csv('CalculatedResult/cos_sim.csv', sep=',', index=False)
 
 '''
     计算疾病相似性得分
 '''
 print 'calculating scores between disease'
+df = pd.read_csv('cos_sim.csv')
+print df.info()
+distances = df.to_dict()
+print diseaseVectors
 diseaseScores = {}
 
 
@@ -105,9 +106,10 @@ for diseaseId in diseaseInfo:
                     if svid < 10312:
                         svid = str(svid)
                         score += distances[str(svid)][vid]
-
+            score /= (len(curDisease) + len(secondDisease))
         else:
             score = distances[str(secondDiseaseId)][int(diseaseId)]
+
         if diseaseId in diseaseScores:
             diseaseScores[diseaseId].append(score)
         else:
