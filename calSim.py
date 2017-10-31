@@ -3,8 +3,8 @@ import scipy.io as sio
 import pandas as pd
 import numpy as np
 import time
-
-diseaseVectors = sio.loadmat('disease_result.mat')
+import math
+diseaseVectors = sio.loadmat('embeddingResult/disease_result.mat')
 diseaseVectors = diseaseVectors['embedding']
 
 '''
@@ -31,7 +31,9 @@ def cal_cos_sim(vector, vector1):
     for index in range(vl):
         mul += vector[index] * vector1[index]
         dis += (vector[index] - vector1[index]) ** 2
-    return float(mul) / dis
+    if dis < 1e-6:
+        return 0
+    return float(mul) / math.sqrt(dis)
 
 
 ''' 
@@ -62,9 +64,9 @@ print('calculating sims between vectors')
 '''
 sims = {}
 # df = pd.read_csv('sim.csv')
-# print(df.info()
+# print(df.info())
 # sims = df.to_dict()
-# print(diseaseVectors
+# print(diseaseVectors)
 for diseaseId in range(len(diseaseVectors)):
     curDisease = diseaseVectors[diseaseId]
 
